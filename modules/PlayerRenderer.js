@@ -1,7 +1,5 @@
 define(['Renderer'], function(Renderer) {
-	function PlayerRenderer(level, cellWidth, cellHeight) {
-		var width = level.width;
-		var height = level.height;
+	function PlayerRenderer(width, height, cellWidth, cellHeight) {
 		Renderer.apply(this, arguments);
 		var self = this;
 		var canvas = document.createElement('canvas');

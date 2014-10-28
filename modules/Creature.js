@@ -97,6 +97,11 @@ define(['Entity', 'Dice'], function(Entity, Dice){
 		})
 		self.on('end', function(){
 			if (self.hp <= 0) {
+				var x = self.x;
+				var y = self.y;
+				self.x = -1; //move self off board before rendering
+				self.y = -1;
+				self.broadcast('textrenderer.begin_render.tile', {x: x, y: y});
 				self.die();
 			}
 		})

@@ -19,7 +19,6 @@ define(['Creature'], function(Creature) {
 					damage: self.attackStrength.roll(),
 					target: source
 				};
-				console.log(newData);
 				self.broadcast('creature.attack', newData);
 			}
 		});

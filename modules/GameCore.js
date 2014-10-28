@@ -1,5 +1,5 @@
-define(['Scene','KeyBinding', 'TextRenderer', 'Player', 'LevelLoader', 'data/scenes', 'data/players', 'data/textrenderers', 'data/levels'], 
-	function (Scene, KeyBinding, TextRenderer, Player, LevelLoader, dataScenes, dataPlayers, dataTextRenderers, dataLevels) {
+define(['Scene','KeyBinding', 'TextRenderer', 'PlayerRenderer', 'Player', 'LevelLoader', 'data/playerrenderers', 'data/scenes', 'data/players', 'data/textrenderers', 'data/levels'], 
+	function (Scene, KeyBinding, TextRenderer, PlayerRenderer, Player, LevelLoader, dataPlayerRenderers, dataScenes, dataPlayers, dataTextRenderers, dataLevels) {
 	function GameCore(){
 		window.addEventListener('keydown', function(event){
 			switch(event.keyCode) {
@@ -30,6 +30,7 @@ define(['Scene','KeyBinding', 'TextRenderer', 'Player', 'LevelLoader', 'data/sce
 		var self = this;
 		this.loadScenes(dataScenes);
 		this.loadTextRenderers(dataTextRenderers);
+		this.loadPlayerRenderers(dataPlayerRenderers);
 		this.loadLevels(dataLevels);
 		this.loadPlayers(dataPlayers);
 	}
@@ -78,6 +79,15 @@ define(['Scene','KeyBinding', 'TextRenderer', 'Player', 'LevelLoader', 'data/sce
 			var textRenderer = new TextRenderer(tr.width, tr.height, tr.cellWidth, tr.cellHeight)
 			for (var j = 0; j < tr.scenes.length; j++) {
 				this.registerEntity(this.scenes[tr.scenes[j]], textRenderer);
+			}
+		}
+	};
+	GameCore.prototype.loadPlayerRenderers = function(playerRenderers) {
+		for (var i = 0; i < playerRenderers.length; i++) {
+			var tr = playerRenderers[i];
+			var playerRenderer = new PlayerRenderer(tr.width, tr.height, tr.cellWidth, tr.cellHeight)
+			for (var j = 0; j < tr.scenes.length; j++) {
+				this.registerEntity(this.scenes[tr.scenes[j]], playerRenderer);
 			}
 		}
 	};
