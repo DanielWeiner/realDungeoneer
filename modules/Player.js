@@ -15,6 +15,12 @@ define(['Creature'], function(Creature) {
 		self.on('creature.collide.creature', function(event, data, source){
 			if (data.originId === self.id) {
 				self.broadcast('player.collide.creature', data);
+				var newData = {
+					damage: self.attackStrength.roll(),
+					target: source
+				};
+				console.log(newData);
+				self.broadcast('creature.attack', newData);
 			}
 		});
 		self.on('creature.collide.tile', function(event, data){

@@ -65,15 +65,11 @@ define(['Entity', 'Dice'], function(Entity, Dice){
 		self.on('creature.attack', function(event, data, source){
 			if (data.target === self) {
 				self.hp -= data.damage;
-				if (self.hp <= 0) {
-					self.die();
-				} else {
-					var newData = {
-						target: source,
-						damage: self.attackStrength.roll()
-					}
-					self.broadcast('creature.counter', newData);
+				var newData = {
+					target: source,
+					damage: self.attackStrength.roll()
 				}
+				self.broadcast('creature.counter', newData);
 			}
 		});
 		self.on('creature.counter', function(event, data){
@@ -97,6 +93,11 @@ define(['Entity', 'Dice'], function(Entity, Dice){
 					y: self.y
 				}
 				self.broadcast('textrenderer.render.creature', data);
+			}
+		})
+		self.on('end', function(){
+			if (self.hp <= 0) {
+				self.die();
 			}
 		})
 	}

@@ -1,5 +1,7 @@
-define(['Creature'], function (Creature) {
+define(['Creature', 'Dice'], function (Creature, Dice) {
 	function Monster() {
+		var self = this;
+		Creature.apply(this, arguments);
 		self.on('monster.player_not_detected', function(event, data){
 			//twiddle thumbs... (maybe have a playerLastSeen property and move toward that?)
 			if (data.originId === self.id) {
@@ -46,6 +48,7 @@ define(['Creature'], function (Creature) {
 		
 		self.on('creature.collide', function (event, data){
 			if (data.originId === self.id) {
+
 				self.broadcast('monster.collide', data);
 			}
 		});

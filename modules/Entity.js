@@ -34,7 +34,7 @@ define(['Action'], function(Action) {
 		for (var sceneName in this.scenes) {
 			this.scenes[sceneName].registerAction(action);
 		}
-		this.boundActions[action.id] = action;
+		this.boundActions.push(action);
 		return action.id;
 	};
 	setMethod('removeAction', function(actionId){

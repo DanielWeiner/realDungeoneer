@@ -18,7 +18,7 @@ define(function() {
 			return this.gameCore.registerEntity(this, entity);
 		};
 		this.remove = function(entity) {
-			return this.gameCore.remove(entity);
+			return this.gameCore.removeEntity(this, entity);
 		}
 	}
 

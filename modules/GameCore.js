@@ -92,7 +92,9 @@ define(['Scene','KeyBinding', 'TextRenderer', 'Player', 'LevelLoader', 'data/sce
 	GameCore.prototype.loadLevels = function(levels) {
 		var levelLoader = new LevelLoader();
 		for (var i = 0; i < levels.length; i++) {
-			var level = levelLoader.load(levels[i]).level;
+			var loadedLevel = levelLoader.load(levels[i]);
+			var level = loadedLevel.level;
+			var monsters = loadedLevel.monsters;
 			for(var m = 0; m < levels[i].scenes.length; m++) {
 				for (var j = 0; j < level.grid.length; j++) {
 					for (var k = 0; k < level.grid[j].length; k++) {
@@ -101,7 +103,12 @@ define(['Scene','KeyBinding', 'TextRenderer', 'Player', 'LevelLoader', 'data/sce
 					}
 				}
 				this.registerEntity(this.scenes[levels[i].scenes[m]], level);
+				for (var j = 0; j < monsters.length; j++) {
+					var monster = monsters[j];
+					this.registerEntity(this.scenes[levels[i].scenes[m]], monster);
+				}
 			}
+
 		}
 	}
 	GameCore.prototype.loadMonsters = function() {

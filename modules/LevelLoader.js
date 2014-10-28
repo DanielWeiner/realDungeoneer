@@ -1,4 +1,4 @@
-define(['Level','Tile', 'data/tiles'], function (Level,Tile, dataTiles){
+define(['Level','Tile', 'Monster', 'data/tiles'], function (Level,Tile, Monster, dataTiles){
 	function LevelLoader() {}
 	LevelLoader.prototype.load = function(input) {
 		var level = new Level(input.width, input.height)
@@ -7,10 +7,10 @@ define(['Level','Tile', 'data/tiles'], function (Level,Tile, dataTiles){
 		} else {
 			this.createFromArray(level, input.tiles);
 		}
-		var monsters = this.populateMonsters();
-		this.populateCreat
+		var monsters = this.populateMonsters(level, input.monsterDensity);
 		return {
-			level: level
+			level: level,
+			monsters: monsters
 		};
 	}
 	LevelLoader.prototype.createRandom = function(level) {
@@ -40,6 +40,20 @@ define(['Level','Tile', 'data/tiles'], function (Level,Tile, dataTiles){
 			}
 			level.grid.push(row);
 		}
+	}
+	LevelLoader.prototype.populateMonsters = function(level, monsterDensity) {
+		var monsters = [];
+		for (var i = 0; i < level.grid.length; i++) {
+			for (var j = 0; j < level.grid[i].length; j++) {
+				if (Math.random() <= (monsterDensity / 100)) {
+					var monster = new Monster();
+					monster.x = j;
+					monster.y = i;
+					monsters.push(monster);
+				}
+			}
+		}
+		return monsters;
 	}
 	return LevelLoader;
 })
