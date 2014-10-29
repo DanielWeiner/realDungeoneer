@@ -30,16 +30,16 @@ Actions and create Actions in turn. This method of communication allows loose-co
 really care about other Entities. They just care about the messages that are sent back and forth. This also allows for 
 Entities to be added to a scene at any time and "tune in" to the messages (Actions) that are sent back and forth. Entities
 can exist in multiple contexts -- that is, they can be registered to multiple Scenes; however, their communication is
-usually restricted only to one Scene at a time.
+usually restricted only to one Scene at a time. Entities are analogous to Zakas' **Modules**.
 
 ####Scene
-**Scene**s represent a single game context. You can picture them as "screens". Indeed, a scene will typically have a renderer
+**Scenes** represent a single game context. You can picture them as "screens". Indeed, a scene will typically have a renderer
 registered to it to represent the Scene to the user in a meaninful way. Menus, splash screens, level views, and high score 
 lists are all examples of Scenes. A Scene will have several Entites registered to it, and the Scene will manage the
 communication between entities that are registered with it. In fact, none of the Entities will be directly referencing
 another Entity; they must subscribe to Actions and broadcast actions. In this way, it's the job of the Entity to react to
 other Actions. Sometimes they will produce Actions themselves. There are three ways for a Scene to broadcast messages to
-Entities: hooks, triggers and Actions.
+Entities: hooks, triggers and Actions. Scenes are analogous to Zakas' **Sandboxes**.
 
 #####Hooks
 Hooks are defined in the game's configration. For every system event that occurs, the hooks are broadcast in order, no matter
