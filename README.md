@@ -24,13 +24,14 @@ Zakas' **Core.** The GameCore is responsible for the following:
 * Loading saved games
 * Communicating system events to Scenes
 
-###Entity
+####Entity
 The individual components of a game are **Entities**. Entities are basically objects that have the ability to react to
 Actions and create Actions in turn. This method of communication allows loose-coupling between Entities, as Entities don't
 really care about other Entities. They just care about the messages that are sent back and forth. This also allows for 
 Entities to be added to a scene at any time and "tune in" to the messages (Actions) that are sent back and forth. Entities
 can exist in multiple contexts -- that is, they can be registered to multiple Scenes; however, their communication is
-usually restricted only to one Scene at a time. Entities are analogous to Zakas' **Modules**.
+usually restricted only to one Scene at a time. Entities are analogous to Zakas' **Modules**. Creatures, tiles, items, and
+levels are all Entities.
 
 ####Scene
 **Scenes** represent a single game context. You can picture them as "screens". Indeed, a scene will typically have a renderer
