@@ -1,5 +1,6 @@
 define(['Renderer'], function(Renderer) {
 	function TextRenderer(width, height, cellWidth, cellHeight) {
+		this.cachedCharacters = {};
 		var self = this;
 		this.firstRender = true;
 		Renderer.apply(this, arguments);
@@ -9,12 +10,24 @@ define(['Renderer'], function(Renderer) {
 		var context = canvas.getContext('2d');
 		document.body.appendChild(canvas);
 		this.on('textrenderer.render', function(event, data){
-			context.fillStyle = data.backgroundColor || '#000000';
-			context.font = cellHeight + "px/"+ cellHeight + "px 'Inconsolata',monospace";
-			context.fillRect(data.x * cellWidth, data.y * cellHeight, cellWidth, cellHeight);
-			context.fillStyle = data.color || '#FFFFFF';
-			//todo: cache character to image for faster rendering
-			context.fillText(data.character, data.x * cellWidth, (data.y + 0.75) * cellHeight, cellWidth-1);
+			var cachedCharacter = self.cachedCharacters[data.character+","+data.backgroundColor+","+data.color];
+			if (!cachedCharacter) {
+				var newCanvas = document.createElement('canvas');
+				newCanvas.width = cellWidth;
+				newCanvas.height = cellHeight;
+				var newContext = newCanvas.getContext('2d');
+				newContext.fillStyle = data.backgroundColor || '#000000';
+				newContext.font = cellHeight + "px/"+ cellHeight + "px 'Inconsolata', monospace";
+				newContext.fillRect(0,0,cellWidth, cellHeight);
+				newContext.fillStyle = data.color || '#FFFFFF';
+				newContext.fillText(data.character, 0, 0.8 * cellHeight, cellWidth-1);
+				var dataUrl = newCanvas.toDataURL();
+				var img = document.createElement('img');
+				img.src = dataUrl;
+				self.cachedCharacters[data.character+","+data.backgroundColor+","+data.color] = img;
+				cachedCharacter = self.cachedCharacters[data.character+","+data.backgroundColor+","+data.color];
+			}
+			context.drawImage(cachedCharacter, data.x*cellWidth, data.y*cellHeight);
 		});
 	}
 	TextRenderer.prototype = Object.create(Renderer.prototype);
