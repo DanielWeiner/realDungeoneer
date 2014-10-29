@@ -6,27 +6,14 @@ define(['Creature'], function(Creature) {
 		self.hp = 100;
 		self.textColor = '#FFFF00';
 		self._speed = self.speed;
-		self.on('creature.move_tile_success', function(event, data){
-			if (data.originId === self.id) {
-				self.broadcast('player.move_tile_success', data);
-				
-			}
-		});
-		self.on('creature.collide.creature', function(event, data, source){
-			if (data.originId === self.id) {
-				self.broadcast('player.collide.creature', data);
+		
+		self.on('creature.'+self.id+'.collide.creature', function(event, data){
 				var newData = {
 					damage: self.attackStrength.roll(),
-					target: source
+					originId: self.id
 				};
-				self.broadcast('creature.attack', newData);
-			}
+				self.broadcast('creature.'+data.originId+'.attack', newData);
 		});
-		self.on('creature.collide.tile', function(event, data){
-			if (data.originId === self.id) {
-				self.broadcast('player.collide.tile', data);
-			}
-		})
 		self.on('playerrenderer.begin_render', function(){
 			var data = {
 				hp: self.hp,
@@ -84,8 +71,8 @@ define(['Creature'], function(Creature) {
 						y: self.y + directions[direction].y,
 						originId: self.id
 					};
-					self.broadcast('player.move', data);
-					self.broadcast('creature.move', data);	
+					self.broadcast('player.move.'+data.x+'.' + data.y, data);
+					self.broadcast('creature.move.'+data.x+'.' + data.y, data);	
 				});
 			}(direction));
 		}

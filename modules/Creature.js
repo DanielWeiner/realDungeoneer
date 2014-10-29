@@ -43,39 +43,37 @@ define(['Entity', 'Dice'], function(Entity, Dice){
 		self.attackStrength = new Dice('1d6-1');
 		
 		//collision detection for other creatures
-		self.on('creature.move', function(event, data){
+		self.on('creature.move', function(event, data, source){
 			if (data.x === self.x && data.y === self.y) { //make sure there's no collision
-				self.broadcast('creature.collide.creature', data); //watch where you're going, buddy!
+				console.log(data);
+				var newData = {
+					x: data.originX,
+					y: data.originY,
+					originId: self.id
+				}
+				self.broadcast('creature.'+data.originId+'.collide.creature', newData); //watch where you're going, buddy!
 			}
 		});
-		self.on('creature.move_success', function(event, data){
-			if (data.originId === self.id) {
-				self.broadcast('textrenderer.begin_render.tile', {x: self.x, y: self.y});
-				self.x = data.x;
-				self.y = data.y;
-			}
+		self.on('creature.'+self.id+'.move_success', function(event, data){
+			self.broadcast('textrenderer.begin_render.tile', {x: self.x, y: self.y});
+			self.x = data.x;
+			self.y = data.y;
 		});
 		
-		self.on('creature.collide', function bounceBack(event, data){
-			if (data.originId === self.id) {
-				self.x = data.originX;
-				self.y = data.originY;
-			}
+		self.on('creature.'+self.id+'.collide', function (event, data){
+			self.x = data.x;
+			self.y = data.y;
 		});
-		self.on('creature.attack', function(event, data, source){
-			if (data.target === self) {
-				self.hp -= data.damage;
-				var newData = {
-					target: source,
-					damage: self.attackStrength.roll()
-				}
-				self.broadcast('creature.counter', newData);
+		self.on('creature.'+self.id+'.attack', function(event, data, source){
+			self.hp -= data.damage;
+			var newData = {
+				damage: self.attackStrength.roll(),
+				originId: self.id
 			}
+			self.broadcast('creature.'+data.originId+'.counter', newData);
 		});
-		self.on('creature.counter', function(event, data){
-			if (data.target === self) {
-				self.hp -= data.damage;
-			}
+		self.on('creature.'+self.id+'.counter', function(event, data){
+			self.hp -= data.damage;
 		});
 		self.on('textrenderer.begin_render.creature', function(){
 			self.broadcast('textrenderer.render.creature', {

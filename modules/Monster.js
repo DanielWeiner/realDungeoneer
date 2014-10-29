@@ -26,30 +26,26 @@ define(['Creature', 'Dice'], function (Creature, Dice) {
 			self.speedPoints += self.speed;
 			self.startMove();
 		});
-		self.on('creature.collide.creature', function(event, data, source){
-			if (data.originId === self.id) {
-				var data = {
+		self.on('creature.'+self.id+'.collide.creature', function(event, data, source){
+				var newData = {
 					damage: self.attackStrength.roll(),
-					target: source
+					originId: self.id
 				};
-				self.broadcast('creature.attack', data);
-			}
+				self.broadcast('creature.'+data.originId+'.attack', newData);
 		});
 		self.on('creature.move', function(event, data){
 			if (data.x === self.x && data.y === self.y) { //make sure there's no collision
-				self.broadcast('creature.collide.monster', data);
+				self.broadcast('creature.'+data.originId+'.collide.monster', data);
 			}
 		});
-		self.on('creature.move_success', function(event, data){
-			if (data.originId === self.id) {
-				self.broadcast('monster.move_success', data);
-			}
+		self.on('creature.'+self.id+'.move_success', function(event, data){
+			self.broadcast('monster.'+self.id+'.move_success', data);
 		});
 		
-		self.on('creature.collide', function (event, data){
+		self.on('creature.'+self.id+'.collide', function (event, data){
 			if (data.originId === self.id) {
 
-				self.broadcast('monster.collide', data);
+				self.broadcast('monster.'+self.id+'.collide', data);
 			}
 		});
 
@@ -78,14 +74,16 @@ define(['Creature', 'Dice'], function (Creature, Dice) {
 		var deltaX = self.x  - x;
 		var deltaY = self.y - y;
 		var err = deltaY / deltaX;
+		x = self.x -(Math.abs(err) <= 0.75? sign(deltaX) : 0);
+		y = self.y - (Math.abs(err) >= 0.25? sign(deltaY) : 0);
 		var newData = {
-			x: self.x -(Math.abs(err) <= 0.75? sign(deltaX) : 0),
-			y: self.y - (Math.abs(err) >= 0.25? sign(deltaY) : 0),
+			x: x,
+			y: y,
 			originX: self.x,
 			originY: self.y,
 			originId: self.id
 		}
-		self.broadcast('creature.move', newData);
+		self.broadcast('creature.move.'+x + '.' + y, newData);
 		self.speedPoints -= Creature.baseSpeed;
 		self.startMove();
 	}

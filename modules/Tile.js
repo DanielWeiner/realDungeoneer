@@ -6,13 +6,11 @@ define(['Entity'], function(Entity) {
 		this.y = y;
 		this.passable = true;
 		this.textSymbol = '';
-		this.creatureMove = self.on('creature.move', function(event, data) {
-			if (data.x === self.x && data.y === self.y) { //a creature attempted to move on me
-				if (self.passable) {
-					self.broadcast('creature.move_success', data); //go ahead
-				} else {
-					self.broadcast('creature.collide.wall', data); //nope, sorry
-				}
+		this.creatureMove = self.on('creature.move.' + self.x + '.' + self.y , function(event, data) {
+			if (self.passable) {
+				self.broadcast('creature.'+data.originId+'.move_success', {x: self.x, y: self.y}); //go ahead
+			} else {
+				self.broadcast('creature.'+data.originId+'.collide.wall', {x: data.originX, y: data.originY}); //nope, sorry
 			}
 		});
 		this.textRender = self.on('textrenderer.begin_render.tile', function(event, data){
