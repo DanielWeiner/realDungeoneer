@@ -111,38 +111,6 @@ define(['Entity', 'Dice'], function(Entity, Dice){
 	Creature.prototype.die = function() {
 		this.detachFromAll();
 	}
-	Creature.prototype.startMove = function() {
-		var self = this;
-		if (self.playerLastSeen !== null && self.playerLastSeen.x === self.x && self.playerLastSeen.y === self.y) { //thought he was ove there...
-			self.playerLastSeen = null; //I guess not. hmm...
-		}
-		if (self.speedPoints >= Creature.baseSpeed) {
-			self.broadcast('creature.detect_player', {  //where is he?
-				x: self.x,
-				y: self.y,
-				range: self.eyesightRange,
-				originId: self.id
-			});
-		}
-	}
-	Creature.prototype.moveToward = function(x, y) {
-		var self = this;
-		/* if player is in weapon range, attack within range. otherwise...*/
-		function sign(x) { return x ? x < 0 ? -1 : 1 : 0; }
-		var deltaX = self.x  - x;
-		var deltaY = self.y - y;
-		var err = deltaY / deltaX;
-		var newData = {
-			x: self.x -(Math.abs(err) <= 0.75? sign(deltaX) : 0),
-			y: self.y - (Math.abs(err) >= 0.25? sign(deltaY) : 0),
-			originX: self.x,
-			originY: self.y,
-			originId: self.id
-		}
-		self.broadcast('creature.move', newData);
-		self.speedPoints -= Creature.baseSpeed;
-		self.startMove();
-	}
 	Creature.hostility = {
 		IN_LOVE: 2,
 		FRIENDLY: 1,
