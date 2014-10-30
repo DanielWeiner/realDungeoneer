@@ -32,6 +32,7 @@ define(function() {
 		this.emit('scene.unload');
 	}
 	Scene.prototype.start = function(event) {
+		console.time('turn');
 		this.currentHook = 0;
 		this.paused = false;
 		for (var i = 0; i < this.keyBindings.length; i++) {
@@ -74,6 +75,7 @@ define(function() {
 		this.currentHook = this.hooks.length - 1;
 		this.hookTriggers = {};
 		this.removeExpiredActions();
+		console.timeEnd('turn');
 	};
 
 	Scene.prototype.pause = function() {

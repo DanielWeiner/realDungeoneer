@@ -3,7 +3,7 @@ define(['Creature'], function(Creature) {
 		Creature.apply(this, arguments);
 		var self = this;
 		self.textSymbol = '@';
-		self.hp = 100;
+		self.hp = Infinity;
 		self.textColor = '#FFFF00';
 		self._speed = self.speed;
 		
