@@ -1,5 +1,3 @@
-- Emit entity-specific events (ex: creature.attack.534 ) such that messages meant for a single entity are sent in O(n) time
-	- For tiles, emit position-specific events (ex: creature.move.25.20)
 - Add more features to the PlayerRenderer
 - Add Dungeon Randomizer
 - Give other loaded entities factories (like LevelLoader)

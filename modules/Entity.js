@@ -49,12 +49,13 @@ define(['Action'], function(Action) {
 		}
 	});
 	setMethod('detachFromAll', function(){
+		for (var i = this.boundActions.length - 1; i >= 0; i--) {
+			for (var sceneName in this.scenes) {
+				this.scenes[sceneName].removeAction(this.boundActions[i].id)
+			}
+		}
 		for (var sceneName in this.scenes) {
 			this.scenes[sceneName].remove(this);
-		}
-		var boundActions = this.boundActions.slice();
-		for (var i = 0; i < boundActions.length; i++) {
-			this.removeAction(this.boundActions[i].id);
 		}
 		this.boundActions.length = 0;
 		this.scenes = {};
