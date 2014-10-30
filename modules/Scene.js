@@ -89,7 +89,6 @@ define(function() {
 			throw new Error("hook " + hook + " not registered for scene " + this.name + ".");
 		}
 	};
-
 	Scene.prototype.emit = function(triggerName, data, source) {
 		function createActionNameArray(name) {
 			if (name === '') return [];
@@ -105,7 +104,8 @@ define(function() {
 		var actionNames = createActionNameArray(triggerName);
 		for (var i = 0; i <  actionNames.length; i++) {
 			if (this.actionTree[actionNames[i]]) {
-				this.actionTree[actionNames[i]].forEach(function(action){
+				for (var j = 0; j < this.actionTree[actionNames[i]].length; j++) {
+					var action = this.actionTree[actionNames[i]][j];
 					if (action.offset === 0 && action.duration > 0) {
 						action.duration--;
 						if (source !== action.source) {
@@ -116,7 +116,7 @@ define(function() {
 					} else {
 						this.expiredActions.push(action);
 					}
-				});
+				}
 			}
 		}
 	};

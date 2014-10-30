@@ -1,4 +1,7 @@
 define(['Creature'], function(Creature) {
+	function isClose(x1,y1,x2,y2, range) {
+		return ((x2-x1) * (x2-x1) + (y2-y1) * (y2-y1)) <= (range * range);
+	}
 	function Player(){
 		Creature.apply(this, arguments);
 		var self = this;
@@ -21,17 +24,15 @@ define(['Creature'], function(Creature) {
 			self.broadcast('playerrenderer.render', data);
 		});
 		self.on('monster.detect_player', function(event, data){
-			function dist(x1,y1,x2,y2) {
-				return Math.sqrt(Math.pow(x2-x1, 2) + Math.pow(y2-y1,2));
-			}
-			if (Math.round(dist(self.x, self.y, data.x, data.y)) <= data.range) {
-				self.broadcast('monster.player_detected', {
+			
+			if (isClose(self.x, self.y, data.x, data.y, data.range)) {
+				self.broadcast('monster.player_detected.' + data.originId, {
 					x: self.x,
 					y: self.y,
 					originId: data.originId
 				});
 			} else {
-				self.broadcast('monster.player_not_detected', {originId: data.originId});
+				self.broadcast('monster.player_not_detected.' + data.originId, {originId: data.originId});
 			}
 		});
 		self.setupMove();

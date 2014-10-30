@@ -2,25 +2,20 @@ define(['Creature', 'Dice'], function (Creature, Dice) {
 	function Monster() {
 		var self = this;
 		Creature.apply(this, arguments);
-		self.on('monster.player_not_detected', function(event, data){
-			//twiddle thumbs... (maybe have a playerLastSeen property and move toward that?)
-			if (data.originId === self.id) {
-				if (self.playerLastSeen) {
-					self.moveToward(self.playerLastSeen.x, self.playerLastSeen.y);
-				} else {
-					var die = new Dice('1d3-2'); //-1, 0, or 1
-					self.moveToward(self.x + die.roll(), self.y + die.roll());
-				}
+		self.on('monster.player_not_detected.' + self.id, function(event, data){
+			if (self.playerLastSeen) {
+				self.moveToward(self.playerLastSeen.x, self.playerLastSeen.y);
+			} else {
+				var die = new Dice('1d3-2'); //-1, 0, or 1
+				self.moveToward(self.x + die.roll(), self.y + die.roll());
 			}
 		});
-		self.on('monster.player_detected', function(event, data) {
-			if (data.originId === self.id) {
-				self.playerLastSeen = {
-					x: data.x,
-					y: data.y
-				};
-				self.moveToward(data.x, data.y);
-			}
+		self.on('monster.player_detected.' + self.id, function(event, data) {
+			self.playerLastSeen = {
+				x: data.x,
+				y: data.y
+			};
+			self.moveToward(data.x, data.y);
 		});
 		self.on('middle', function(){
 			self.speedPoints += self.speed;
