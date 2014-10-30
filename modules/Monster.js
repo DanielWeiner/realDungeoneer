@@ -26,28 +26,13 @@ define(['Creature', 'Dice'], function (Creature, Dice) {
 			self.speedPoints += self.speed;
 			self.startMove();
 		});
-		self.on('creature.'+self.id+'.collide.creature', function(event, data, source){
-				var newData = {
-					damage: self.attackStrength.roll(),
-					originId: self.id
-				};
-				self.broadcast('creature.'+data.originId+'.attack', newData);
-		});
-		self.on('creature.move', function(event, data){
-			if (data.x === self.x && data.y === self.y) { //make sure there's no collision
-				self.broadcast('creature.'+data.originId+'.collide.monster', data);
-			}
-		});
-		self.on('creature.'+self.id+'.move_success', function(event, data){
-			self.broadcast('monster.'+self.id+'.move_success', data);
-		});
-		
-		self.on('creature.'+self.id+'.collide', function (event, data){
-			if (data.originId === self.id) {
-
-				self.broadcast('monster.'+self.id+'.collide', data);
-			}
-		});
+		// self.on('creature.'+self.id+'.collide.creature', function(event, data, source){
+		// 		var newData = {
+		// 			damage: self.attackStrength.roll(),
+		// 			originId: self.id
+		// 		};
+		// 		self.broadcast('creature.'+data.originId+'.attack', newData);
+		// });
 
 	}
 	Monster.prototype = Object.create(Creature.prototype);
@@ -83,7 +68,7 @@ define(['Creature', 'Dice'], function (Creature, Dice) {
 			originY: self.y,
 			originId: self.id
 		}
-		self.broadcast('creature.move.'+x + '.' + y, newData);
+		self.broadcast('move.'+x + '.' + y, newData);
 		self.speedPoints -= Creature.baseSpeed;
 		self.startMove();
 	}

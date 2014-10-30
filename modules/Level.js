@@ -4,7 +4,6 @@ define(['Entity', 'Tile'], function(Entity, Tile) {
 		this.width = width;
 		this.height = height;
 		this.grid = [];
-		//this.setupTiles();
 	}
 	Level.prototype = Object.create(Entity.prototype);
 	Level.prototype.constructor = Level;

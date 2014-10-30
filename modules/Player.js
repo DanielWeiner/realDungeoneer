@@ -71,7 +71,7 @@ define(['Creature'], function(Creature) {
 						y: self.y + directions[direction].y,
 						originId: self.id
 					};
-					self.broadcast('move.'+data.x+'.' + data.y, data);
+					self.broadcast('move.'+data.x+'.'+ data.y, data);
 				});
 			}(direction));
 		}

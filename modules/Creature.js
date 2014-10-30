@@ -1,11 +1,7 @@
 define(['Entity', 'Dice', 'Positionable', 'Obstacle'], function(Entity, Dice, Positionable, Obstacle){
 	function Creature() {
 		Entity.apply(this, arguments);
-		//extend Positionable abstract class
-		Positionable.apply(this, arguments);
-		//extend Obstacle abstract class
-		Obstacle.apply(this, arguments);
-
+		
 		var self = this;
 		self.x = 0;
 		self.y = 0;
@@ -58,30 +54,26 @@ define(['Entity', 'Dice', 'Positionable', 'Obstacle'], function(Entity, Dice, Po
 		// 		self.broadcast('creature.'+data.originId+'.collide.creature', newData); //watch where you're going, buddy!
 		// 	}
 		// });
-		// self.on('creature.'+self.id+'.move_success', function(event, data){
-		// 	self.broadcast('textrenderer.begin_render.tile', {x: self.x, y: self.y});
-		// 	self.x = data.x;
-		// 	self.y = data.y;
-		// });
-		
-		// self.on('creature.'+self.id+'.collide', function (event, data){
-		// 	self.x = data.x;
-		// 	self.y = data.y;
-		// });
-		// self.on('creature.'+self.id+'.attack', function(event, data, source){
-		// 	self.hp -= data.damage;
-		// 	var newData = {
-		// 		damage: self.attackStrength.roll(),
-		// 		originId: self.id
-		// 	}
-		// 	self.broadcast('creature.'+data.originId+'.counter', newData);
-		// });
-		// self.on('creature.'+self.id+'.counter', function(event, data){
-		// 	self.hp -= data.damage;
-		// });
-		self.on('move_success.' + this.id, function(event, data){
+		self.on('move_success.' + self.id, function(event, data){
+			self.broadcast('textrenderer.begin_render.tile', {x: self.x, y: self.y});
 			self.changePosition(data.x, data.y);
+		});
+		self.on('collide.' + self.id, function(event,data) {
+			if (data.type = 'obstacle') {
+				self.broadcast('attack.' + data.obstacleId, {damage: self.attackStrength.roll(), originId: self.id});
+			}
 		})
+		self.on('attack.' + self.id, function(event, data){
+			self.hp -= data.damage;
+			var newData = {
+				damage: self.attackStrength.roll(),
+				originId: self.id
+			}
+			self.broadcast('counter.' + data.originId, newData);
+		});
+		self.on('counter.' + self.id, function(event, data){
+			self.hp -= data.damage;
+		});
 		self.on('textrenderer.begin_render.creature', function(){
 			self.broadcast('textrenderer.render.creature', {
 				character: self.textSymbol,
@@ -109,7 +101,11 @@ define(['Entity', 'Dice', 'Positionable', 'Obstacle'], function(Entity, Dice, Po
 				self.broadcast('textrenderer.begin_render.tile', {x: x, y: y});
 				self.die();
 			}
-		})
+		});
+		//extend Positionable abstract class
+		Positionable.apply(this, arguments);
+		//extend Obstacle abstract class
+		Obstacle.apply(this, arguments);
 	}
 	Creature.prototype = Object.create(Entity.prototype);
 	Creature.prototype.constructor = Creature;

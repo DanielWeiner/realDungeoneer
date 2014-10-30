@@ -116,6 +116,7 @@ define(['Scene','KeyBinding', 'TextRenderer', 'PlayerRenderer', 'Player', 'Level
 				for (var j = 0; j < monsters.length; j++) {
 					var monster = monsters[j];
 					this.registerEntity(this.scenes[levels[i].scenes[m]], monster);
+					monster.changePosition(monster.x, monster.y);
 				}
 			}
 
