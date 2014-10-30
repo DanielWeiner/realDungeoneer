@@ -1,5 +1,6 @@
 define(function() {
 	var sceneId = -1;
+	var boundActions = [];
 	function Scene(name, hooks, keyBindings) {
 		this.name = name; 
 		this.hooks = hooks;
@@ -12,6 +13,7 @@ define(function() {
 		this.paused = true;
 		this.id = ++sceneId;
 		this.registerAction = function(action) {
+			boundActions[action.id] = action;
 			return this.gameCore.registerAction(this, action);
 		};
 		this.add = function(entity) {
@@ -89,7 +91,7 @@ define(function() {
 	Scene.prototype.emit = function(triggerName, data, source) {
 		function createActionNameArray(name) {
 			if (name === '') return [];
-			var splitName = triggerName.split('.');
+			var splitName = name.split('.');
 			var resultArr = [];
 			var currElement = '';
 			for (var i = 0; i < splitName.length; i++) {
@@ -98,14 +100,14 @@ define(function() {
 			}
 			return resultArr;
 		}
-		var actionNames = createActionNameArray(triggerName.name);
+		var actionNames = createActionNameArray(triggerName);
 		for (var i = 0; i <  actionNames.length; i++) {
 			if (this.actionTree[actionNames[i]]) {
 				this.actionTree[actionNames[i]].forEach(function(action){
 					if (action.offset === 0 && action.duration > 0) {
 						action.duration--;
 						if (source !== action.source) {
-							action.callback(actionNames[i], data, source);
+							action.callback(triggerName, data, source);
 						}
 					} else {
 						action.offset--;
@@ -115,16 +117,15 @@ define(function() {
 		}
 	};
 	Scene.prototype.removeAction = function(actionId) {
-		var action;
-		for (var actionName in this.actionTree) {
-			for (var i = 0; i < this.actionTree[actionName].length; i++) {
-				if (this.actionTree[actionName][i].id === actionId) {
-					action = this.actionTree[actionName][i];
-					this.actionTree[actionName].splice(i,1);
+		var action = boundActions[actionId];
+		if (action) {
+			for (var i = 0; i < this.actionTree[action.name].length; i++) {
+				if (this.actionTree[action.name][i].id === actionId) {
+					this.actionTree[action.name].splice(i,1);
+					delete boundActions[actionId];
 					break;
 				}
 			}
-			if (action) break;
 		}
 	};
 	Scene.prototype.removeExpiredActions = function() {

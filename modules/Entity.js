@@ -52,6 +52,11 @@ define(['Action'], function(Action) {
 		for (var sceneName in this.scenes) {
 			this.scenes[sceneName].remove(this);
 		}
+		var boundActions = this.boundActions.slice();
+		for (var i = 0; i < boundActions.length; i++) {
+			this.removeAction(this.boundActions[i].id);
+		}
+		this.boundActions.length = 0;
 		this.scenes = {};
 	});
 	setMethod('detach', function(sceneName){

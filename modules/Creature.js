@@ -1,6 +1,11 @@
-define(['Entity', 'Dice'], function(Entity, Dice){
+define(['Entity', 'Dice', 'Positionable', 'Obstacle'], function(Entity, Dice, Positionable, Obstacle){
 	function Creature() {
 		Entity.apply(this, arguments);
+		//extend Positionable abstract class
+		Positionable.apply(this, arguments);
+		//extend Obstacle abstract class
+		Obstacle.apply(this, arguments);
+
 		var self = this;
 		self.x = 0;
 		self.y = 0;
@@ -41,40 +46,42 @@ define(['Entity', 'Dice'], function(Entity, Dice){
 		};
 		self.wallet = 100;
 		self.attackStrength = new Dice('1d6-1');
-		
 		//collision detection for other creatures
-		self.on('creature.move', function(event, data, source){
-			if (data.x === self.x && data.y === self.y) { //make sure there's no collision
-				console.log(data);
-				var newData = {
-					x: data.originX,
-					y: data.originY,
-					originId: self.id
-				}
-				self.broadcast('creature.'+data.originId+'.collide.creature', newData); //watch where you're going, buddy!
-			}
-		});
-		self.on('creature.'+self.id+'.move_success', function(event, data){
-			self.broadcast('textrenderer.begin_render.tile', {x: self.x, y: self.y});
-			self.x = data.x;
-			self.y = data.y;
-		});
+		// self.on('creature.move', function(event, data, source){
+		// 	if (data.x === self.x && data.y === self.y) { //make sure there's no collision
+		// 		console.log(data);
+		// 		var newData = {
+		// 			x: data.originX,
+		// 			y: data.originY,
+		// 			originId: self.id
+		// 		}
+		// 		self.broadcast('creature.'+data.originId+'.collide.creature', newData); //watch where you're going, buddy!
+		// 	}
+		// });
+		// self.on('creature.'+self.id+'.move_success', function(event, data){
+		// 	self.broadcast('textrenderer.begin_render.tile', {x: self.x, y: self.y});
+		// 	self.x = data.x;
+		// 	self.y = data.y;
+		// });
 		
-		self.on('creature.'+self.id+'.collide', function (event, data){
-			self.x = data.x;
-			self.y = data.y;
-		});
-		self.on('creature.'+self.id+'.attack', function(event, data, source){
-			self.hp -= data.damage;
-			var newData = {
-				damage: self.attackStrength.roll(),
-				originId: self.id
-			}
-			self.broadcast('creature.'+data.originId+'.counter', newData);
-		});
-		self.on('creature.'+self.id+'.counter', function(event, data){
-			self.hp -= data.damage;
-		});
+		// self.on('creature.'+self.id+'.collide', function (event, data){
+		// 	self.x = data.x;
+		// 	self.y = data.y;
+		// });
+		// self.on('creature.'+self.id+'.attack', function(event, data, source){
+		// 	self.hp -= data.damage;
+		// 	var newData = {
+		// 		damage: self.attackStrength.roll(),
+		// 		originId: self.id
+		// 	}
+		// 	self.broadcast('creature.'+data.originId+'.counter', newData);
+		// });
+		// self.on('creature.'+self.id+'.counter', function(event, data){
+		// 	self.hp -= data.damage;
+		// });
+		self.on('move_success.' + this.id, function(event, data){
+			self.changePosition(data.x, data.y);
+		})
 		self.on('textrenderer.begin_render.creature', function(){
 			self.broadcast('textrenderer.render.creature', {
 				character: self.textSymbol,
@@ -109,6 +116,15 @@ define(['Entity', 'Dice'], function(Entity, Dice){
 	Creature.prototype.die = function() {
 		this.detachFromAll();
 	}
+	//extend the Positional abstract Class
+	for (var method in Positionable.prototype) {
+		Creature.prototype[method] = Positionable.prototype[method];
+	}
+	//extend the Positional abstract Class
+	for (var method in Obstacle.prototype) {
+		Creature.prototype[method] = Obstacle.prototype[method];
+	}
+
 	Creature.hostility = {
 		IN_LOVE: 2,
 		FRIENDLY: 1,
