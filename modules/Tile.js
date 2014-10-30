@@ -7,10 +7,10 @@ define(['Entity','Positionable'], function(Entity, Positionable) {
 		this.y = y;
 		this.passable = true;
 		this.textSymbol = '';
+		this.transparent = true;
 
 		var obstacleOnMe = false;
 		var obstacleId = -1;
-
 		// bacause this call is synchronous, these will always get set immediately after the original broadcast() call
 		// and before the next statement.
 		this.onPosition('tile.obstacle_found', function(event, data){

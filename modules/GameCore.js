@@ -148,33 +148,31 @@ define(['Scene','KeyBinding', 'TextRenderer', 'PlayerRenderer', 'Player', 'Level
 	GameCore.prototype.registerEntity = function(scene, entity) {
 		entity.scenes[scene.name] = scene;
 		scene.entities[entity.id] = entity;
-		for (var actionId in entity.boundActions) {
-			this.registerAction(scene, entity.boundActions[actionId]);
+		for (var i = 0; i < entity.boundActions.length; i++) {
+			this.registerAction(scene, entity.boundActions[i]);
 		}
 		entity.broadcast('entity.create', {entity: entity});
 		return entity.id;
 	}
 	GameCore.prototype.removeEntity = function(scene, entity) {
-		for (var i = scene.entities.length - 1; i >= 0; i--) {
-			if (scene.entities[i] === entity) {
-				scene.entities.splice(i,1);
-			}
-		}
-		for (var actionName in scene.actionTree) {
-			for (var i = scene.actionTree[actionName].length - 1; i >= 0; i--) {
-				if (scene.actionTree[actionName][i].source === entity) {
-					scene.actionTree[actionName].splice(i,1);
-				}
-			}
-		}
+		delete entity.scenes[scene.name];
+		delete scene.entities[entity.id];
+		;
 	}
 	GameCore.prototype.registerAction = function(scene, action) {
+		scene.boundActions[action.id] = action;
 		scene.actionTree[action.name] = scene.actionTree[action.name] || [];
 		scene.actionTree[action.name].push(action);
 		return action.id;
 	}
 	GameCore.prototype.removeAction = function(scene, action) {
-
+		for (var i = 0; i < scene.actionTree[action.name].length; i++) {
+			if (scene.actionTree[action.name][i] === action) {
+				scene.actionTree[action.name].splice(i,1);
+				return action;
+			}
+		}		
+		return undefined;
 	}
 	GameCore.prototype.exposeEntity = function() {
 

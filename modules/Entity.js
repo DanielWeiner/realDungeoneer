@@ -7,7 +7,7 @@ define(['Action'], function(Action) {
 	}
 	function setMethod (methodName, method) {
 		Entity.prototype[methodName] = function() {
-			if (!Object.getOwnPropertyNames(this.scenes).length) throw new Error("Entity must be registered to a Scene");
+			if (!Object.getOwnPropertyNames(this.scenes).length) throw new Error("Entity "+this.id+" must be registered to a Scene");
 			return method.apply(this, arguments);
 		}
 	}
@@ -49,21 +49,18 @@ define(['Action'], function(Action) {
 		}
 	});
 	setMethod('detachFromAll', function(){
-		for (var i = this.boundActions.length - 1; i >= 0; i--) {
-			for (var sceneName in this.scenes) {
-				this.scenes[sceneName].removeAction(this.boundActions[i].id)
-			}
-		}
 		for (var sceneName in this.scenes) {
-			this.scenes[sceneName].remove(this);
+			this.detach(sceneName);
 		}
-		this.boundActions.length = 0;
-		this.scenes = {};
 	});
 	setMethod('detach', function(sceneName){
 		if (sceneName in this.scenes) {
+			for (var i = this.boundActions.length - 1; i >= 0; i--) {
+				if (this.scenes[sceneName].removeAction(this.boundActions[i].id)) {
+					this.boundActions.splice(i,1);
+				}
+			}
 			this.scenes[sceneName].remove(this);
-			delete this.scenes[sceneName];
 		} else {
 			throw new Error("Entity not registered to scene " + sceneName);
 		}

@@ -33,9 +33,13 @@ define(['Level','Tile', 'Monster', 'data/tiles'], function (Level,Tile, Monster,
 		for (var i = 0; i < level.height; i++) {
 			var row = [];
 			for (var j = 0; j < level.width; j++) {
+				var dataTile = dataTiles[tileArray[i][j]];
 				var tile = new Tile(j, i);
-				tile.passable = dataTiles[tileArray[i][j]].passable;
-				tile.textSymbol = dataTiles[tileArray[i][j]].ch;
+				var passable = dataTile.passable;
+				var transparent = dataTile.transparent;
+				tile.passable = (passable !== null && passable !== undefined)?  passable : true;
+				tile.transparent = (transparent !== null && transparent !== undefined)?  transparent : true;
+				tile.textSymbol = dataTile.ch;
 				row.push(tile);
 			}
 			level.grid.push(row);

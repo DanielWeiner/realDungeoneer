@@ -42,18 +42,7 @@ define(['Entity', 'Dice', 'Positionable', 'Obstacle'], function(Entity, Dice, Po
 		};
 		self.wallet = 100;
 		self.attackStrength = new Dice('1d6-1');
-		//collision detection for other creatures
-		// self.on('creature.move', function(event, data, source){
-		// 	if (data.x === self.x && data.y === self.y) { //make sure there's no collision
-		// 		console.log(data);
-		// 		var newData = {
-		// 			x: data.originX,
-		// 			y: data.originY,
-		// 			originId: self.id
-		// 		}
-		// 		self.broadcast('creature.'+data.originId+'.collide.creature', newData); //watch where you're going, buddy!
-		// 	}
-		// });
+
 		self.on('move_success.' + self.id, function(event, data){
 			self.broadcast('textrenderer.begin_render.tile', {x: self.x, y: self.y});
 			self.changePosition(data.x, data.y);
@@ -61,6 +50,8 @@ define(['Entity', 'Dice', 'Positionable', 'Obstacle'], function(Entity, Dice, Po
 		self.on('collide.' + self.id, function(event,data) {
 			if (data.type = 'obstacle') {
 				self.broadcast('attack.' + data.obstacleId, {damage: self.attackStrength.roll(), originId: self.id});
+			} else {
+				console.log("yeowch");
 			}
 		})
 		self.on('attack.' + self.id, function(event, data){
@@ -74,6 +65,7 @@ define(['Entity', 'Dice', 'Positionable', 'Obstacle'], function(Entity, Dice, Po
 		self.on('counter.' + self.id, function(event, data){
 			self.hp -= data.damage;
 		});
+
 		self.on('textrenderer.begin_render.creature', function(){
 			self.broadcast('textrenderer.render.creature', {
 				character: self.textSymbol,

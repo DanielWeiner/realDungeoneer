@@ -1,6 +1,5 @@
 define(function() {
 	var sceneId = -1;
-	var boundActions = [];
 	function Scene(name, hooks, keyBindings) {
 		this.name = name; 
 		this.hooks = hooks;
@@ -12,8 +11,9 @@ define(function() {
 		this.entities = {};
 		this.paused = true;
 		this.id = ++sceneId;
+		this.boundActions = {};
+		this.expiredActions = [];
 		this.registerAction = function(action) {
-			boundActions[action.id] = action;
 			return this.gameCore.registerAction(this, action);
 		};
 		this.add = function(entity) {
@@ -109,34 +109,26 @@ define(function() {
 						if (source !== action.source) {
 							action.callback(triggerName, data, source);
 						}
-					} else {
+					} else if (action.duration > 0) {
 						action.offset--;
+					} else {
+						this.expiredActions.push(action);
 					}
 				});
 			}
 		}
 	};
 	Scene.prototype.removeAction = function(actionId) {
-		var action = boundActions[actionId];
-		if (action) {
-			for (var i = 0; i < this.actionTree[action.name].length; i++) {
-				if (this.actionTree[action.name][i].id === actionId) {
-					this.actionTree[action.name].splice(i,1);
-					delete boundActions[actionId];
-					break;
-				}
-			}
-		}
+		var action = this.boundActions[actionId];
+		delete this.boundActions[actionId];
+		return this.gameCore.removeAction(this, action);
 	};
 	Scene.prototype.removeExpiredActions = function() {
-		for (var actionName in this.actionTree) {
-			for (var i = this.actionTree[actionName].length - 1; i >=0; i--) {
-				var action = this.actionTree[actionName][i];
-				if (action.duration <= 0) {
-					this.actionTree[actionName].splice(i,1);
-				}
-			}
+		for (var i = 0; i < this.expiredActions.length; i++) {
+			var action = this.expiredActions[i];
+			this.removeAction(action);
 		}
+		this.expiredActions.length = 0;
 	};
 	Scene.prototype.exposeEntity = function() {
 

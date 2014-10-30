@@ -7,13 +7,12 @@ define(['Creature'], function(Creature) {
 		self.textColor = '#FFFF00';
 		self._speed = self.speed;
 		
-		self.on('creature.'+self.id+'.collide.creature', function(event, data){
-				var newData = {
-					damage: self.attackStrength.roll(),
-					originId: self.id
-				};
-				self.broadcast('creature.'+data.originId+'.attack', newData);
-		});
+		self.on('collide.' + self.id, function(event, data) {
+			if (data.type === "impasse") {
+				alert("ow!");
+			}
+		})
+
 		self.on('playerrenderer.begin_render', function(){
 			var data = {
 				hp: self.hp,
