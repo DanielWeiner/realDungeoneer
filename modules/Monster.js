@@ -1,71 +1,57 @@
-define(['Creature', 'Dice'], function (Creature, Dice) {
+define(['ClassUtil', 'Creature', 'Dice'], function (ClassUtil, Creature, Dice) {
 	function Monster() {
-		var self = this;
-		Creature.apply(this, arguments);
-		self.on('monster.player_not_detected.' + self.id, function(event, data){
-			if (self.playerLastSeen) {
-				self.moveToward(self.playerLastSeen.x, self.playerLastSeen.y);
-			} else {
-				var die = new Dice('1d3-2'); //-1, 0, or 1
-				self.moveToward(self.x + die.roll(), self.y + die.roll());
+		Creature.call(this);
+		this.playerLastSeen = null;
+		this.onState('can_see', 'i_am_here', function(event, data) {
+			var x = data.x;
+			var y = data.y;
+			var pos = this.getPosition();
+			var thisX = pos.x;
+			var thisY = pos.y;
+			var dx = thisX - x;
+			var dy = thisY - y;
+			if (dx*dx + dy*dy <= this.vision*this.vision) {
+				this.playerLastSeen = {
+					x: x,
+					y: y
+				}
 			}
 		});
-		self.on('monster.player_detected.' + self.id, function(event, data) {
-			self.playerLastSeen = {
-				x: data.x,
-				y: data.y
-			};
-			self.moveToward(data.x, data.y);
+		this.on('middle', function() {
+			var x = 0,y = 0;
+			var currentPosition = this.getPosition();
+			if (this.playerLastSeen === null) {
+				x = ~~(Math.random() * 3) - 1;
+				y = ~~(Math.random() * 3) - 1;
+			} else {
+				function sign(x) {
+					return x === 0? 0 : x > 0? 1 : -1; 
+				}
+				Δy = this.playerLastSeen.y - currentPosition.y;
+				Δx = this.playerLastSeen.x - currentPosition.x;
+				if (Δx !== 0) {
+					var ratio = Δy/Δx;
+					if (Math.abs(ratio) <= 2) {
+						x = sign(Δx);
+					}
+					if (Math.abs(ratio) > .5) {
+						y = sign(Δy);
+					}
+				} else {
+					x = 0;
+					y = sign(Δy);
+				}
+			}
+			
+			var newMove = {
+				x: x + currentPosition.x,
+				y: y + currentPosition.y
+			}
+			if (x === 0 && y === 0) this.playerLastSeen = null;
+			this.attemptMove(newMove.x, newMove.y);
 		});
-		self.on('middle', function(){
-			self.speedPoints += self.speed;
-			self.startMove();
-		});
-		// self.on('creature.'+self.id+'.collide.creature', function(event, data, source){
-		// 		var newData = {
-		// 			damage: self.attackStrength.roll(),
-		// 			originId: self.id
-		// 		};
-		// 		self.broadcast('creature.'+data.originId+'.attack', newData);
-		// });
 
 	}
-	Monster.prototype = Object.create(Creature.prototype);
-	Monster.prototype.constructor = Monster;
-
-	Monster.prototype.startMove = function() {
-		var self = this;
-		if (self.playerLastSeen !== null && self.playerLastSeen.x === self.x && self.playerLastSeen.y === self.y) { //thought he was over there...
-			self.playerLastSeen = null; //I guess not. hmm...
-		}
-		if (self.speedPoints >= Creature.baseSpeed) {
-			self.broadcast('monster.detect_player', {  //where is he?
-				x: self.x,
-				y: self.y,
-				range: self.eyesightRange,
-				originId: self.id
-			});
-		}
-	}
-	Monster.prototype.moveToward = function(x, y) {
-		var self = this;
-		/* if player is in weapon range, attack within range. otherwise...*/
-		function sign(x) { return x ? x < 0 ? -1 : 1 : 0; }
-		var deltaX = self.x  - x;
-		var deltaY = self.y - y;
-		var err = deltaY / deltaX;
-		x = self.x -(Math.abs(err) <= 0.75? sign(deltaX) : 0);
-		y = self.y - (Math.abs(err) >= 0.25? sign(deltaY) : 0);
-		var newData = {
-			x: x,
-			y: y,
-			originX: self.x,
-			originY: self.y,
-			originId: self.id
-		}
-		self.broadcast('move.'+x + '.' + y, newData);
-		self.speedPoints -= Creature.baseSpeed;
-		self.startMove();
-	}
+	ClassUtil.extend(Monster, Creature);
 	return Monster;
 })

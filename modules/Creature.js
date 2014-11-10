@@ -1,125 +1,77 @@
-define(['Entity', 'Dice', 'Positionable', 'Obstacle'], function(Entity, Dice, Positionable, Obstacle){
-	function Creature() {
-		Entity.apply(this, arguments);
-		
-		var self = this;
-		self.x = 0;
-		self.y = 0;
-		self.ac = 0;
-		self.hp = 20;
-		self.mp = 0;
-		self.speed = 12;
-		self.speedPoints = Creature.baseSpeed;
-		self.textColor = '#00FFFF';
-		self.textSymbol = '&';
-		self.playerLastSeen = null;
-		self.eyesightRange = 5;
-		self.hostility = Creature.HOSTILE;
-		self.attributes = {
-			strength: 10,
-			dexterity: 10,
-			intelligence: 10,
-			wisdom: 10,
-			constitution: 10,
-			charisma: 10
-		};
-		self.armor = {
-			head: null,
-			body: null,
-			leftFoot: null,
-			rightFoot: null,
-			leftHand: null,
-			rightHand: null,
-			cloak: null
-		};
-		self.adornments = {
-			rightRing: null,
-			leftRing: null,
-			amulet: null
+define(['ClassUtil', 'Entity', 'Dice', 'mixins/Positionable', 'mixins/Lookable'], function(ClassUtil, Entity, Dice, Positionable, Lookable){
+	function Creature () {
+		Entity.call(this);
+		Positionable.call(this);
+		Lookable.call(this);
+		this.HP = 20;
+		this.glyph = '&';
+		this.glyphBackground = '#000000';
+		this.glyphColor = '#00FFFF';
+		this.on("can_i_move", function(event, data){
+			return {
+				move: false,
+				source: 'creature'
+			}
+		});
+		this.on('attack', function(event, data){
+			this.takeDamage(data.attack);
+			return {counterAttack: ~~(Math.random() * 5)};
+		});
+	}
+	ClassUtil.extend(Creature, Entity);
+	ClassUtil.mixin(Creature, Positionable);
+	ClassUtil.mixin(Creature, Lookable);
+	Creature.prototype.attemptMove = function(x,y) {
+		this.broadcastAtCoords(x,y,'can_i_move');
+		var responses = this.broadcastAtCoords(x, y, 'can_i_move');
+		var currentPosition =  this.getPosition();
+		if (responses.length && responses.every(function(response){return response.move})) {
+			this.moveTo(x, y);
+		} else {
+			if (responses.length && (x !== currentPosition.x || y !== currentPosition.y)) {
+				this.collide(x,y,responses.filter(function(response){return !response.move}));
+			}
 		}
-		self.inventory = {
-			
-		};
-		self.wallet = 100;
-		self.attackStrength = new Dice('1d6-1');
-
-		self.on('move_success.' + self.id, function(event, data){
-			self.broadcast('textrenderer.begin_render.tile', {x: self.x, y: self.y});
-			self.changePosition(data.x, data.y);
+	}
+	Creature.prototype.render = function() {
+		this.broadcast('draw_glyph', {
+			glyph: this.glyph,
+			color: this.glyphColor,
+			backgroundColor: this.glyphBackground,
+			x: this.getPosition().x,
+			y: this.getPosition().y
 		});
-		self.on('collide.' + self.id, function(event,data) {
-			if (data.type = 'obstacle') {
-				self.broadcast('attack.' + data.obstacleId, {damage: self.attackStrength.roll(), originId: self.id});
-			} else {
-				console.log("yeowch");
-			}
-		})
-		self.on('attack.' + self.id, function(event, data){
-			self.hp -= data.damage;
-			var newData = {
-				damage: self.attackStrength.roll(),
-				originId: self.id
-			}
-			self.broadcast('counter.' + data.originId, newData);
-		});
-		self.on('counter.' + self.id, function(event, data){
-			self.hp -= data.damage;
-		});
-
-		self.on('textrenderer.begin_render.creature', function(){
-			self.broadcast('textrenderer.render.creature', {
-				character: self.textSymbol,
-				color: self.textColor,
-				x: self.x,
-				y: self.y
-			});
-		});
-		self.on('textrenderer.render.tile', function(event, data){
-			if (self.x === data.x && self.y === data.y) {
-				data = {
-					character: self.textSymbol,
-					x: self.x,
-					y: self.y
+	}
+	Creature.prototype.moveTo = function(x,y) {
+		var currentPosition = this.getPosition();
+		this.setPosition(x, y);
+		this.render();
+		this.broadcastAtCoords(currentPosition.x, currentPosition.y, 'draw_tile');
+	}
+	Creature.prototype.collide = function(x,y,collisionResponses) {
+		for (var i = 0; i < collisionResponses.length; i++) {
+			if (collisionResponses[i].source === 'creature') {
+				//Todo: dice
+				var responses = this.broadcastAtCoords(x, y, 'attack', {attack: ~~(Math.random() * 5)});
+				for (var j = 0; j < responses.length; j++) {
+					this.takeDamage(responses[j].counterAttack);
 				}
-				self.broadcast('textrenderer.render.creature', data);
 			}
-		})
-		self.on('end', function(){
-			if (self.hp <= 0) {
-				var x = self.x;
-				var y = self.y;
-				self.x = -1; //move self off board before rendering
-				self.y = -1;
-				self.broadcast('textrenderer.begin_render.tile', {x: x, y: y});
-				self.die();
-			}
-		});
-		//extend Positionable abstract class
-		Positionable.apply(this, arguments);
-		//extend Obstacle abstract class
-		Obstacle.apply(this, arguments);
+		}
 	}
-	Creature.prototype = Object.create(Entity.prototype);
-	Creature.prototype.constructor = Creature;
 	Creature.prototype.die = function() {
-		this.detachFromAll();
+		for (var scene in this.scenes) {
+			this.removeScene(scene);
+		}
+		this.unregisterPositionableContext();
 	}
-	//extend the Positional abstract Class
-	for (var method in Positionable.prototype) {
-		Creature.prototype[method] = Positionable.prototype[method];
+	Creature.prototype.takeDamage = function(damage) {
+		this.HP -= damage;
+		if (this.HP < 0) {
+			var pos = this.getPosition();
+			this.broadcastAtCoords(pos.x, pos.y, 'draw_tile');
+			this.die();
+		}
 	}
-	//extend the Positional abstract Class
-	for (var method in Obstacle.prototype) {
-		Creature.prototype[method] = Obstacle.prototype[method];
-	}
-
-	Creature.hostility = {
-		IN_LOVE: 2,
-		FRIENDLY: 1,
-		NEUTRAL: 0,
-		SUSPICIOUS: -1,
-		HOSTILE: -2
-	};
-	Creature.baseSpeed = 12;
 	return Creature;
 });

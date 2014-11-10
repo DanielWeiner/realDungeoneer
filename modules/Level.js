@@ -1,21 +1,11 @@
-define(['Entity', 'Tile'], function(Entity, Tile) {
+define(['Entity', 'PositionableContext', 'ClassUtil'], function(Entity, PositionableContext, ClassUtil) {
 	function Level(width, height) {
 		Entity.call(this);
-		this.width = width;
-		this.height = height;
-		this.grid = [];
+		this.positionableContext = new PositionableContext(width, height);
+		this.on('get_level', function(){
+			return this;
+		});
 	}
-	Level.prototype = Object.create(Entity.prototype);
-	Level.prototype.constructor = Level;
-	Level.prototype.setupTiles = function() {
-		for (var i = 0; i < this.height; i++) {
-			for (var j = 0; j < this.width; j++) {
-				var tile = new Tile(this.scene, j, i);
-				if (Math.random() > .99) tile.passable = false;
-				this.grid.push(tile);
-			}
-		}
-	}
-
+	ClassUtil.extend(Level, Entity);
 	return Level;
 });
