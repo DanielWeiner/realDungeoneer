@@ -4,6 +4,9 @@ define(['ClassUtil', 'Entity', 'Dice', 'mixins/Positionable', 'mixins/Lookable']
 		Positionable.call(this);
 		Lookable.call(this);
 		this.HP = 20;
+		this.isDead = false;
+		this.speed = 12;
+		this.speedPoints = 12;
 		this.glyph = '&';
 		this.glyphBackground = '#000000';
 		this.glyphColor = '#00FFFF';
@@ -64,6 +67,7 @@ define(['ClassUtil', 'Entity', 'Dice', 'mixins/Positionable', 'mixins/Lookable']
 			this.removeScene(scene);
 		}
 		this.unregisterPositionableContext();
+		this.isDead = true;
 	}
 	Creature.prototype.takeDamage = function(damage) {
 		this.HP -= damage;
@@ -73,5 +77,6 @@ define(['ClassUtil', 'Entity', 'Dice', 'mixins/Positionable', 'mixins/Lookable']
 			this.die();
 		}
 	}
+	Creature.baseSpeed = 12;
 	return Creature;
 });

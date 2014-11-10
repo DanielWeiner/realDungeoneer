@@ -46,5 +46,9 @@ define(['ClassUtil', 'Creature', 'mixins/Lookable'], function(ClassUtil, Creatur
 		});
 	}
 	ClassUtil.extend(Player, Creature);
+	Player.prototype.setSpeed = function(speed) {
+		Creature.baseSpeed = speed;
+		this.speed = speed;
+	}
 	return Player;
 });
