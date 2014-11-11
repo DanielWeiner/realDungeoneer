@@ -9,9 +9,10 @@ define(['ClassUtil', 'Creature', 'Dice'], function (ClassUtil, Creature, Dice) {
 			var pos = this.getPosition();
 			var thisX = pos.x;
 			var thisY = pos.y;
-			var dx = thisX - x;
-			var dy = thisY - y;
-			if (dx*dx + dy*dy <= this.vision*this.vision) {
+			var Δx = thisX - x;
+			var Δy = thisY - y;
+			// if a²+b² <= c², then the player is within visible range.
+			if (Δx*Δx + Δy*Δy <= this.vision*this.vision) {
 				this.playerLastSeen = {
 					x: x,
 					y: y
@@ -42,10 +43,10 @@ define(['ClassUtil', 'Creature', 'Dice'], function (ClassUtil, Creature, Dice) {
 			Δx = this.playerLastSeen.x - currentPosition.x;
 			if (Δx !== 0) {
 				var ratio = Δy/Δx;
-				if (Math.abs(ratio) <= 2) {
+				if (Math.abs(ratio) < 2) {
 					x = sign(Δx);
 				}
-				if (Math.abs(ratio) > .5) {
+				if (Math.abs(ratio) >= .5) {
 					y = sign(Δy);
 				}
 			} else {
